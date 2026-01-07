@@ -1,0 +1,102 @@
+/* PAGE */
+.page {
+  padding: 25px;
+  min-height: 100vh;
+  transition: 0.25s ease;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* CARD */
+.card {
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  transition: 0.25s ease;
+}
+
+/* INPUTS */
+.input,
+.textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+.textarea {
+  min-height: 120px;
+}
+
+/* UNIVERSAL BUTTON STYLE */
+.btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  margin-right: 10px;
+  font-size: 14px;
+}
+
+/* BUTTON VARIANTS */
+.btn-default {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: white;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+}
+
+/* RESULT ITEM */
+.resultItem {
+  list-style: none;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.score {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+/* MODAL */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.modal {
+  padding: 20px;
+  border-radius: 10px;
+  width: 420px;
+  max-width: 90%;
+  text-align: center;
+  word-wrap: break-word;
+  overflow-y: auto;
+  max-height: 75vh;
+}
