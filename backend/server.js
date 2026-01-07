@@ -19,12 +19,12 @@ app.get("/", (req, res) => {
   res.send("AI Document Search Backend Running");
 });
 
-const path = require("path");
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
 const documentRoutes = require("./routes/documents");
 app.use("/api/documents", documentRoutes);
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
+// Port (works locally and on Render)
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

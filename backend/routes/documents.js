@@ -6,18 +6,21 @@ const axios = require("axios");
 const multer = require("multer");
 const pdfParse = require("pdf-parse");
 const mammoth = require("mammoth");
-const fs = require("fs");
+const fs = require("fs/promises");
 const path = require("path");
 
-// MULTER
+const cloudinary = require("../cloudinary");
+
+// Multer temporary local storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname)
+  filename: (req, file, cb) =>
+    cb(null, Date.now() + "-" + file.originalname)
 });
 
 const upload = multer({ storage });
 
-// EMBEDDING 
+// Embedding
 async function generateEmbedding(text) {
   try {
     const response = await axios.post(
@@ -50,7 +53,7 @@ function cosineSimilarity(a, b) {
   return dot / (magA * magB);
 }
 
-//ADD MANUAL DOC
+// Add manual document
 router.post("/add", async (req, res) => {
   try {
     const { title, content } = req.body;
@@ -65,7 +68,7 @@ router.post("/add", async (req, res) => {
   }
 });
 
-//BASIC SEARCH 
+// Basic search
 router.get("/search", async (req, res) => {
   try {
     const { q } = req.query;
@@ -83,18 +86,14 @@ router.get("/search", async (req, res) => {
   }
 });
 
-//  AI VECTOR SEARCH 
+// AI vector search
 router.get("/ai-search", async (req, res) => {
   try {
     const { q } = req.query;
 
-    // embed query
     const queryEmbedding = await generateEmbedding(q);
-
-    // fetch docs
     const docs = await Document.find();
 
-    // score & sort
     const scored = docs
       .map(doc => ({
         _id: doc._id,
@@ -113,18 +112,16 @@ router.get("/ai-search", async (req, res) => {
   }
 });
 
-//FILE UPLOAD 
+// File upload with Cloudinary + public preset
 router.post("/upload", upload.single("file"), async (req, res) => {
   try {
-    console.log("File received:", req.file);
-
     const filePath = req.file.path;
     const ext = path.extname(req.file.originalname).toLowerCase();
 
     let extractedText = "";
 
     if (ext === ".pdf") {
-      const data = await pdfParse(fs.readFileSync(filePath));
+      const data = await pdfParse(await fs.readFile(filePath));
       extractedText = data.text;
     } else if (ext === ".docx") {
       const data = await mammoth.extractRawText({ path: filePath });
@@ -133,12 +130,25 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "Only PDF and DOCX supported" });
     }
 
+    // Upload using public preset
+    const uploaded = await cloudinary.uploader.upload(filePath, {
+      upload_preset: "public_raw" ,
+      resource_type: "raw"
+    });
+
+    // Cleanup temp file
+    try {
+      await fs.unlink(filePath);
+    } catch (err) {
+      console.log("Temp file cleanup failed:", err.message);
+    }
+
     const embedding = await generateEmbedding(extractedText);
 
     const doc = new Document({
       title: req.file.originalname,
       content: extractedText,
-      filePath,
+      filePath: uploaded.secure_url,
       embedding
     });
 
@@ -151,12 +161,13 @@ router.post("/upload", upload.single("file"), async (req, res) => {
   }
 });
 
-// See ALL Docs
+// All docs
 router.get("/all", async (req, res) => {
   const docs = await Document.find();
   res.json(docs);
 });
 
+// Delete
 router.delete("/:id", async (req, res) => {
   try {
     await Document.findByIdAndDelete(req.params.id);

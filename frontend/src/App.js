@@ -13,7 +13,7 @@ function App() {
   const [theme, setTheme] = useState("light");
   const [confirmDelete, setConfirmDelete] = useState(null);
 
-  const apiBase = "http://localhost:5000/api/documents";
+  const apiBase = process.env.REACT_APP_API_BASE;
 
   const addDocument = async () => {
     if (!title || !content) return toast.error("Title and content required");
@@ -64,7 +64,8 @@ function App() {
 
       setResults(data);
 
-      if (data.length > 0) toast.success(`AI matched ${data.length} document(s)`);
+      if (data.length > 0)
+        toast.success(`AI matched ${data.length} document(s)`);
       else toast.warn("AI could not find anything relevant");
     } catch {
       toast.error("AI search failed");
@@ -163,7 +164,11 @@ function App() {
       <div className="card" style={{ background: t.card }}>
         <h3>Upload PDF / DOCX</h3>
 
-        <input type="file" className="input" onChange={(e) => setFile(e.target.files[0])} />
+        <input
+          type="file"
+          className="input"
+          onChange={(e) => setFile(e.target.files[0])}
+        />
 
         <button className="btn btn-primary" onClick={uploadFile}>
           Upload
@@ -228,12 +233,11 @@ function App() {
 
               <p>{doc.content?.slice(0, 200)}...</p>
 
+
               {doc.filePath && (
                 <button
                   className="btn btn-default"
-                  onClick={() =>
-                    window.open(`http://localhost:5000/${doc.filePath}`, "_blank")
-                  }
+                  onClick={() => window.open(doc.filePath, "_blank")}
                 >
                   Open File
                 </button>
